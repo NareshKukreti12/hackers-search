@@ -283,6 +283,7 @@ module.exports={
 
     UserRoles:(req,res)=>{
         Users.Permissions().then(perm=>{
+            console.log(perm);
             let query='select UA.*,x.permissions from user_roles UA '+
             'LEFT JOIN  (SELECT s.role_id,s.status ,'+
             'GROUP_CONCAT(s.permission_id) AS permissions '+  
@@ -292,10 +293,22 @@ module.exports={
             connection.query(query,[1],function(err,result){
                 let roles=[];
                 for(let i=0;i<result.length;i++){
-                   
+                    let allPerms=[];
+                    let permissions=[];
+                    if(result[i]["permissions"].length>0){
+                     allPerms=result[i]["permissions"].split(',');
+                    }
+                    for(let j=0;j<allPerms.length;j++){
+                       permissions.push({ 
+                           permission_id:Number(allPerms[j]),
+                          permission:perm[allPerms[j]-1]
+                       })
+                    }
+                    console.log("Permissions",permissions)
                     roles.push({
                         role_id:result[i]["role_id"],
-                        role:result[i]["role"]
+                        role:result[i]["role"],
+                        permissions
                     })
                 }
                 res.status(200).send({

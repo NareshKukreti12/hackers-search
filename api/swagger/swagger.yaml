@@ -288,10 +288,10 @@ paths:
           type: string
         - name: user
           in: body
-          description: Pass in query parameter
+          description: Pass in body
           required: false
           schema:
-            $ref: "#/definitions/Roles"              
+            $ref: "#/definitions/CreateRoles"              
       responses:
         "200":
           description: Success
@@ -557,7 +557,27 @@ definitions:
          permissions:
            type: array
            items: 
-             type: number
+            $ref: "#/definitions/PermissionItems"   
+  CreateRolesItems:
+       required:
+         - role
+       properties:
+         role_id:
+           type: integer
+         role:
+           type: string        
+         permissions:
+           type: array
+           items: 
+             type: number             
+  CreateRoles:
+      required:
+        - roles
+      properties:
+        roles:
+          type: array
+          items:
+           $ref: "#/definitions/CreateRolesItems"            
   
   #HTTP Response code definitions          
   SuccessResponse:
