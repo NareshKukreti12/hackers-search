@@ -1,0 +1,624 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: Hackers Search API
+# during dev, should point to your local machine
+host: 192.168.2.10:8080
+# basePath prefixes all resource paths 
+basePath: /
+# 
+schemes:
+  # tip: remove http to make production-grade
+  - http
+  - https
+# format of bodies a client can send (Content-Type)
+consumes:
+  - application/json
+# format of the responses to the client (Accepts)
+produces:
+  - application/json
+paths:
+  /auth/registration:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: auth
+    post:
+      tags:
+        - Auth      
+      description: Create New Account
+      # used as the method name of the controller
+      operationId: CreateAccount
+      parameters:
+        - name: user
+          in: body
+          required: false
+          schema:
+            $ref: "#/definitions/UserBody" 
+        - name: authorization
+          required: false
+          in: header
+          type: string
+          description: Authorization header required only if admin creating new users            
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        "401":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Unauthorized"            
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /auth/login:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: auth
+    post:
+      tags:
+        - Auth    
+      description: Login API
+      # used as the method name of the controller
+      operationId: login
+      parameters:
+        - name: user
+          in: body
+          description: Pass in query parameter
+          required: false
+          schema:
+            $ref: "#/definitions/Login" 
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/LoginResponse"
+        "401":
+          description: Unauthorized
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Unauthorized"            
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"       
+  /auth/reg_sources:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: auth
+    get:
+      tags:
+        - Auth    
+      description: Fetch all permissions
+      # used as the method name of the controller
+      operationId: RegSources
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/RegistrationSources"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"     
+  /auth/verify_email:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: auth
+    get:
+      tags:
+        - Auth    
+      description: Verify user's email address
+      # used as the method name of the controller
+      operationId: verifyEmail
+      parameters:
+        - name: verify_token
+          in: query
+          description: Pass in query parameter
+          required: true
+          type: string  
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"          
+  /auth/password:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: auth
+    put:
+      tags:
+        - Auth    
+      description: Update current password
+      # used as the method name of the controller
+      operationId: update_password
+      parameters:
+        - name: authorization
+          in: header
+          description: Pass in query parameter
+          required: true
+          type: string
+        - name: user
+          in: body
+          description: Pass in query parameter
+          required: false
+          schema:
+            $ref: "#/definitions/PasswordBody"           
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"                      
+  /users/permissions:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: users
+    get:
+      tags:
+        - User    
+      description: Fetch all permissions
+      # used as the method name of the controller
+      operationId: permissions
+      parameters:
+        - name: authorization
+          in: header
+          description: Pass in query parameter
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Permissions"
+        "401":
+          description: Unauthorized
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Unauthorized"            
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"        
+            
+  /users/users:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: users
+    get:
+      tags:
+        - User    
+      description: Fetch all permissions
+      # used as the method name of the controller
+      operationId: GetUser
+      parameters:
+        - name: authorization
+          in: header
+          description: Pass in query parameter
+          required: true
+          type: string
+        - name: all
+          in: query
+          description: Pass 1 if you want to get all users (sub-admins)
+          required: false
+          type: integer
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Users"
+        "401":
+          description: Unauthorized
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Unauthorized"     
+        "204":
+          description: "No content found"
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/NoContent"                 
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"                 
+
+    put:
+      tags:
+        - User    
+      description: Fetch all permissions
+      # used as the method name of the controller
+      operationId: UpdateUser
+      parameters:
+        - name: authorization
+          in: header
+          description: Pass in query parameter
+          required: true
+          type: string
+        - name: user
+          in: body
+          description: Update user body
+          required: false
+          schema:
+            $ref: "#/definitions/UpdateUser"          
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Users"
+        "401":
+          description: Unauthorized
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Unauthorized"     
+        "204":
+          description: "No content found"
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/NoContent"                 
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"                 
+
+  /users/roles:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: users
+    post:
+      tags:
+        - User    
+      description: Fetch all permissions
+      # used as the method name of the controller
+      operationId: CreateRoles
+      parameters:
+        - name: authorization
+          in: header
+          description: Pass in query parameter
+          required: true
+          type: string
+        - name: user
+          in: body
+          description: Pass in query parameter
+          required: false
+          schema:
+            $ref: "#/definitions/Roles"              
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        "401":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Unauthorized"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"    
+    get:
+      tags:
+        - User    
+      description: Fetch all permissions
+      # used as the method name of the controller
+      operationId: UserRoles
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Roles"
+
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+            
+  /swagger:
+    x-swagger-pipe: swagger_raw
+# complex objects have schema definitions
+definitions:
+  
+ 
+  UserBody:
+    required:
+      - first_name
+      - email
+      - role_id
+      - source_id
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      role_id:
+        type: number
+      source_id:
+        type: number
+      first_name:
+        type: string
+      middle_name:
+        type: string
+      last_name: 
+        type: string
+      address_line1:
+        type: string
+      address_line2:
+        type: string        
+      landmark:
+        type: string
+      city: 
+        type: string
+      state:
+        type: string
+      country:
+        type: string
+      pincode:
+        type: string
+      dob:
+        type: string
+      gender:
+        type: string
+      photo:
+        type: string
+      permissions:
+        type: array
+        items:
+           type: integer           
+     
+  
+  Login:
+    required:
+      - email
+      - source_id
+    properties:
+      email:
+       type: string
+      password:
+       type: string
+      source_id:
+       type: integer
+  LoginResponse: 
+   required:
+      - success
+      - message
+   properties:
+      success:
+       type: boolean
+      message:
+       type: string
+      token:
+        type: string
+  PermissionItems:
+    required:
+      - permission_id
+      - permission
+    properties:
+      permission_id:
+        type: integer
+      permission:
+        type: string
+  Permissions:
+    required:
+      - permissions
+    properties:
+      permissions:
+        type: array
+        items:
+            $ref: "#/definitions/PermissionItems"    
+  
+  
+  SourcesItems:
+    required:
+      - source_id
+      - source_name
+    properties:
+      source_id:
+        type: integer
+      source_name:
+        type: string
+  RegistrationSources:
+    required: 
+      - sources
+    properties:
+      sources:
+        type: array
+        items:
+            $ref: "#/definitions/SourcesItems"    
+  
+  UserDetails:
+    required:
+      - email
+      - first_name
+      - address_line1
+      - address_line2
+      - landmark
+      - state
+      - country
+      - pincode
+      - dob
+      - gender
+      - photo
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      middle_name:
+        type: string
+      last_name:
+        type: string
+      address_line1:
+        type: string
+      address_line2:
+        type: string
+      landmark:
+        type: string
+      state:
+        type: string
+      country:
+        type: string
+      pincode: 
+        type: string
+      dob:
+        type: string
+      gender:
+        type: string
+      photo:
+        type: string
+  UserItems:
+    required:
+      - u_id
+      - role_id
+      - role
+      - source_id
+      - source_name
+      - created_by_id
+      - created_by_fname
+      - created_date
+      - created_time
+      - user_details
+    properties: 
+      u_id:
+        type: integer
+      role_id:
+        type: integer
+      role:
+        type: string
+      source_id:
+        type: integer
+      source_name:
+        type: string
+      created_by_id:
+        type: integer
+      created_by_fname:
+        type: string
+      created_by_mname:
+        type: string   
+      created_by_lname:
+        type: string    
+      created_date:
+        type: string
+      created_time:
+        type: string
+      user_details:
+        type: array
+        items:
+            $ref: "#/definitions/UserDetails"  
+      user_permissions:
+        type: array
+        items:
+            $ref: "#/definitions/PermissionItems"                      
+  Users:
+    required:
+      - users
+    properties:
+      users:
+        type: array
+        items:
+           $ref: "#/definitions/UserItems"
+           
+  PasswordBody:
+    required:
+       - current_password
+       - new_password
+    properties:
+       current_password:
+         type: string
+       new_password:
+         type: string
+  Roles:
+   required:
+      - roles
+   properties:
+      roles:
+        type: array
+        items:
+           $ref: "#/definitions/RolesItems"
+  RolesItems:
+       required:
+         - role_id
+         - role
+         - permissions
+       properties:
+         role_id:
+           type: integer
+         role:
+           type: string        
+         permissions:
+           type: array
+           items: 
+             type: number
+  
+  #HTTP Response code definitions          
+  SuccessResponse:
+    required:
+      - message
+      - success
+    properties:
+      message:
+        type: string
+      success:
+        type: boolean
+  Unauthorized:
+    required:
+      - message
+    properties:
+     message:
+       type: string
+  NoContent:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+
+  UpdateUser:
+    required:
+      - u_id
+    properties:
+      u_id:
+        type: integer
+      first_name:
+        type: string
+      middle_name:
+        type: string
+      last_name:
+        type: string
+      address_line1:
+        type: string
+      address_line2:
+        type: string
+      landmark:
+        type: string
+      city:
+        type: string
+      state:
+        type: string
+      country: 
+        type: string
+      pincode:
+        type: string
+      dob:
+        type: string
+      gender:
+        type: string
+      photo:
+        type: string
+  ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
