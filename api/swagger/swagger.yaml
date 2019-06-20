@@ -550,7 +550,6 @@ definitions:
        required:
          - role_id
          - role
-         - permissions
        properties:
          role_id:
            type: integer

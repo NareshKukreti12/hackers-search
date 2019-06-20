@@ -130,9 +130,11 @@ module.exports={
             }          
 
  
-                    let permissions=['Create','Read','Update','Delete'];
-                    
-                    let query= 'SELECT ' +
+                  
+                    Users.Permissions().then(perm=>{
+                        let permissions=[]=perm;
+                        console.log("All Permissions");
+                        let query= 'SELECT ' +
                     'UA.u_id ,'+
                     'UA.email,'+
                     'UA.role_id,'+
@@ -240,7 +242,9 @@ module.exports={
                          })
                      }
                    // console.log(users)
-                })
+                    })
+                 })
+                    
 
         }
         else{
@@ -278,18 +282,28 @@ module.exports={
     },
 
     UserRoles:(req,res)=>{
-        connection.query('select * from user_roles',function(err,result){
-            let roles=[];
-            for(let i=0;i<result.length;i++){
-                roles.push({
-                    role_id:result[i]["role_id"],
-                    role:result[i]["role"]
+        Users.Permissions().then(perm=>{
+            let query='select UA.*,x.permissions from user_roles UA '+
+            'LEFT JOIN  (SELECT s.role_id,s.status ,'+
+            'GROUP_CONCAT(s.permission_id) AS permissions '+  
+            'FROM user_permissions s '+
+            'GROUP BY s.role_id) x ON x.role_id = UA.role_id '+
+            'where x.status=?'
+            connection.query(query,[1],function(err,result){
+                let roles=[];
+                for(let i=0;i<result.length;i++){
+                   
+                    roles.push({
+                        role_id:result[i]["role_id"],
+                        role:result[i]["role"]
+                    })
+                }
+                res.status(200).send({
+                    roles
                 })
-            }
-            res.status(200).send({
-                roles
             })
         })
+        
     },
      UpdateUser:(req,res)=>{
          if(req.headers  && req.headers.authorization){

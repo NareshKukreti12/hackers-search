@@ -47,6 +47,11 @@ class Users{
        })
     })
  } 
+ static Permissions(){
+    return new Promise((resolve,reject)=>{
+      let permissions=['Create','Read','Update','Delete'];
+       resolve(permissions)
+    })
+ }
 }
 module.exports={Users};
-
