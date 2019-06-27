@@ -5,12 +5,13 @@ class Users{
  static GetUserByEmail(email){
     return new Promise((resolve,reject)=>{
 
-      let query='select UA.*,x.permissions from user_account UA ' +
+      let query='select UA.*,x.permissions,UAP.first_name,UAP.last_name from user_account UA ' +
       'LEFT JOIN  (SELECT s.role_id,'+
       'GROUP_CONCAT(s.permission_id) AS permissions  '+
-      'FROM user_permissions s '+
+      'FROM user_permissions s  where s.status=1 '+
       'GROUP BY s.role_id) x ON x.role_id = UA.role_id '+
-      'where UA.email=? and status=?'
+      'LEFT JOIN user_account_personal UAP on UAP.u_id=UA.u_id '+
+      'where UA.email=? and UA.status=?'
 
         connection.query(query,[email,1],function(err,result){
            if(err)reject(err);
@@ -20,12 +21,13 @@ class Users{
  }
  static GetUserByUserId(user_id){
    return new Promise((resolve,reject)=>{
-      let query='select UA.*,x.permissions from user_account UA ' +
+      let query='select UA.*,x.permissions,UAP.first_name,UAP.last_name from user_account UA ' +
       'LEFT JOIN  (SELECT s.role_id,'+
-      'GROUP_CONCAT(s.permission_id) AS permissions  '+
-      'FROM user_permissions s '+
+      'GROUP_CONCAT(s.permission_id) AS permissions '+
+      'FROM user_permissions s  where s.status=1 '+
       'GROUP BY s.role_id) x ON x.role_id = UA.role_id '+
-      'where UA.u_id=? and status=?'
+      'LEFT JOIN user_account_personal UAP on UAP.u_id=UA.u_id '+
+      'where UA.u_id=? and UA.status=?'
       connection.query(query,[user_id,1],function(err,result){
          if(err)reject(err);
          resolve(result)
@@ -55,3 +57,5 @@ class Users{
  }
 }
 module.exports={Users};
+
+

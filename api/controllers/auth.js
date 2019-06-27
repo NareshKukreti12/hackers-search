@@ -4,7 +4,8 @@ _       = require('lodash'),
  {Users}=require('../user'),
 config  = require('../config'),
 jwt     = require('jsonwebtoken'),
-bcrypt  = require('bcrypt-nodejs');
+bcrypt  = require('bcrypt-nodejs'),
+{Responses}=require('../responses');
 var frontEndUrl=config.front_end_url;
 var adminEmail = "info@prminfotech.com";
 var nodemailer = require('nodemailer');  
@@ -77,7 +78,7 @@ function CreateNewUser(res,req,created_by){
     permisssions=req.swagger.params.user.value.permissions;  
      if(source_id==1){
          //If user registered from email address
-         if(role_id==1){
+         if(role_id!=3){
              password=generatePassword();
          }
         } 
@@ -87,14 +88,14 @@ function CreateNewUser(res,req,created_by){
                  success:false
              })
          }
-         if(role_id==1){
-             if(permisssions==null || permisssions.length==0){
-                 return res.status(200).send({
-                     success:false,
-                     message:"Permissions required"
-                 })
-             }
-         }
+        //  if(role_id!=3){
+        //      if(permisssions==null || permisssions.length==0){
+        //          return res.status(200).send({
+        //              success:false,
+        //              message:"Permissions required"
+        //          })
+        //      }
+        //  }
          console.log("Password is",password);
          bcrypt.hash(password,null,null,function(err,hash){
              let user_id;
@@ -270,6 +271,8 @@ function sendMail(email,name,resetToken,password,type,source_id){
 
 
 
+ 
+
 
 
 
@@ -307,9 +310,7 @@ module.exports={
                  }
                  catch
                  {
-                      return res.status(401).send({
-                          message:"Unauthorized access"
-                      })
+                       Responses.Unauthorized(res);
                  }
                  Users.GetUserByUserId(decoded.id).then(response=>{
                      
@@ -320,10 +321,7 @@ module.exports={
 
                         }
                         else{
-                            res.status(401).send({
-                                success:true,
-                                message:"Unauthorized access"
-                            })
+                            Responses.Unauthorized(res);
                         }
                  },(err)=>{
                     
@@ -407,16 +405,12 @@ module.exports={
                 decoded=jwt.verify(authorization,config.secretKey);
             }
             catch{
-                return res.status(401).send({
-                    message:"Unauthorized access"
-                })
+                Responses.Unauthorized(res);
             }
             
         }
         else{
-            res.status(401).send({
-                message:"Unauthorized access"
-            })
+            Responses.Unauthorized(res);
         }
     },
     verifyEmail:(req,res)=>{
@@ -430,9 +424,7 @@ module.exports={
             }
             catch(err){
                 console.log(err)
-                return res.status(401).send({
-                    message:"Unauthorized access"
-                })
+                Responses.Unauthorized(res);
             }
             connection.query('update user_claims set email_confirmed=? where u_id=?',[1,decoded.id],function(err,result){
                 if(err)throw err;
@@ -456,9 +448,7 @@ module.exports={
                 decoded=jwt.verify(authorization,config.secretKey);
              }
              catch{
-               return res.status(401).send({
-                    message:"Uanuthorized auccess"
-                })
+                Responses.Unauthorized(res);
              }
             let current_password=req.swagger.params.user.value.current_password;
             let new_password=req.swagger.params.user.value.new_password;
@@ -497,10 +487,73 @@ module.exports={
 
         }
         else{
-            res.status(401).send({
-                message:"Uanuthorized auccess"
-            })
+            Responses.Unauthorized(res);
         }
+    },
+    forgot_password:(req,res)=>{
+        let email=req.swagger.params.user.value.email;
+        Users.GetUserByEmail(email).then(user=>{
+             if(user.length==0){
+                return res.status(204).send({
+                    message:"No such user exists!"
+                })
+             }
+             console.log(user[0]["u_id"]);
+             let userd={
+                 id:user[0]["u_id"]
+             }
+             let resetToken=createResetToken(userd);
+             console.log("Reset Token",resetToken)
+            //  let reset_token={
+            //      id:createResetToken(user[0]["u_id"])
+            //  }
+           let name=user[0]["first_name"]+" "+user[0]["last_name"]
+           res.status(200).send({
+               success:true,
+               message:"A password reset message was sent to your email address. Please click the link in that message to reset your password."
+           })
+           sendMail(email,name,resetToken,"",2,1);
+        })
+    },
+    reset_password:(req,res)=>{
+        let token=req.swagger.params.user.value.token;
+        let password=req.swagger.params.user.value.password;
+        
+        let decoded;
+        try{
+            decoded=jwt.verify(token,config.secretKey);
+        }
+        catch{
+            Responses.Unauthorized(res);
+        }
+        console.log(decoded.id);
+        Users.GetUserByUserId(decoded.id).then(userdetails=>{
+            if(userdetails.length==0){
+                return res.status(204).send({
+                message:"No user found"
+            })
+           }
+           bcrypt.hash(password,null,null,function(err,hash){
+               connection.query('update user_account set password=?,modified_by_id=?,modified_on=? where u_id=?',
+               [hash,decoded.id,new Date(),decoded.id],function(err,result){
+                   if(err)throw err;
+                   res.status(200).send({
+                       success:true,
+                       message:"You have successfully reset your password. You can now login using your new password"
+                   })
+                   let cred_audit_trail={
+                        u_id:decoded.id,
+                        password:userdetails[0]["password"],
+                        modified_by:userdetails[0]["modified_by"],
+                        modified_time:userdetails[0]["modified_time"]
+                   }
+                   connection.query("insert into user_credential_trail SET ?",[cred_audit_trail],function(err,result){
+                     if(err)throw err; 
+                    console.log("Password audit trails");
+                   })
+               })
+           })
+        })
     }
    
  

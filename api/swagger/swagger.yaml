@@ -160,6 +160,69 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"                      
+
+  /auth/password/forgot:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: auth
+    post:
+      tags:
+        - Auth    
+      description: Send reset link to registered email address
+      # used as the method name of the controller
+      operationId: forgot_password
+      parameters:
+        - name: user
+          in: body
+          description: Pass in query parameter
+          required: false
+          schema:
+            $ref: "#/definitions/ForgotPasswordBody"           
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        "204":
+          description: "No content found"
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/NoContent"         
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"                      
+  /auth/password/reset:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: auth
+    post:
+      tags:
+        - Auth    
+      description: Send reset link to registered email address
+      # used as the method name of the controller
+      operationId: reset_password
+      parameters:
+        - name: user
+          in: body
+          description: Pass in query parameter
+          required: false
+          schema:
+            $ref: "#/definitions/ResetPasswordBody"           
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        "204":
+          description: "No content found"
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/NoContent"         
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"                                  
   /users/permissions:
     # binds a127 app logic to a route
     x-swagger-router-controller: users
@@ -190,7 +253,6 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"        
-            
   /users/users:
     # binds a127 app logic to a route
     x-swagger-router-controller: users
@@ -235,7 +297,7 @@ paths:
     put:
       tags:
         - User    
-      description: Fetch all permissions
+      description: Update user
       # used as the method name of the controller
       operationId: UpdateUser
       parameters:
@@ -255,28 +317,55 @@ paths:
           description: Success
           schema:
             # a pointer to a definition
-            $ref: "#/definitions/Users"
+            $ref: "#/definitions/SuccessResponse"
         "401":
           description: Unauthorized
           schema:
             # a pointer to a definition
             $ref: "#/definitions/Unauthorized"     
-        "204":
-          description: "No content found"
-          schema:
-            # a pointer to a definition
-            $ref: "#/definitions/NoContent"                 
         default:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"                 
-
+    delete:
+      tags:
+        - User    
+      description: Delete user
+      # used as the method name of the controller
+      operationId: DeleteUser
+      parameters:
+        - name: authorization
+          in: header
+          description: Pass in query parameter
+          required: true
+          type: string
+        - name: user_id
+          in: query
+          description: Pass user id to query
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        "401":
+          description: Unauthorized
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Unauthorized"     
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"                             
+            
   /users/roles:
     # binds a127 app logic to a route
     x-swagger-router-controller: users
     post:
       tags:
-        - User    
+        - Roles    
       description: Fetch all permissions
       # used as the method name of the controller
       operationId: CreateRoles
@@ -307,9 +396,10 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"    
+            
     get:
       tags:
-        - User    
+        - Roles    
       description: Fetch all permissions
       # used as the method name of the controller
       operationId: UserRoles
@@ -324,13 +414,44 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+    put:
+      tags:
+        - Roles    
+      description: Fetch all permissions
+      # used as the method name of the controller
+      operationId: UpdateRole
+      parameters:
+        - name: authorization
+          in: header
+          description: Pass in query parameter
+          required: true
+          type: string
+        - name: user
+          in: body
+          description: Pass in body
+          required: false
+          schema:
+            $ref: "#/definitions/UpdateRoles"              
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        "401":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Unauthorized"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"    
             
   /swagger:
     x-swagger-pipe: swagger_raw
 # complex objects have schema definitions
 definitions:
-  
- 
   UserBody:
     required:
       - first_name
@@ -417,8 +538,6 @@ definitions:
         type: array
         items:
             $ref: "#/definitions/PermissionItems"    
-  
-  
   SourcesItems:
     required:
       - source_id
@@ -435,8 +554,7 @@ definitions:
       sources:
         type: array
         items:
-            $ref: "#/definitions/SourcesItems"    
-  
+            $ref: "#/definitions/SourcesItems"   
   UserDetails:
     required:
       - email
@@ -488,7 +606,6 @@ definitions:
       - created_by_fname
       - created_date
       - created_time
-      - user_details
     properties: 
       u_id:
         type: integer
@@ -608,6 +725,8 @@ definitions:
     properties:
       u_id:
         type: integer
+      role_id:
+        type: integer
       first_name:
         type: string
       middle_name:
@@ -633,6 +752,33 @@ definitions:
       gender:
         type: string
       photo:
+        type: string
+        
+  ForgotPasswordBody:
+    required:
+      - email
+    properties:
+      email:
+        type: string
+  UpdateRoles:
+    required:
+      - role_id
+      - permissions
+    properties:
+      role_id:    
+           type: integer
+      permissions:
+           type: array
+           items: 
+             type: number   
+  ResetPasswordBody:
+    required:
+      - token
+      - password
+    properties:
+      token:
+        type: string
+      password:
         type: string
   ErrorResponse:
     required:
