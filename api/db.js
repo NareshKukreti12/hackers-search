@@ -1,11 +1,5 @@
 'use strict'
 var mysql = require('mysql');
-var SwaggerExpress = require('swagger-express-mw');
-var app = require('express')();
-var appjs=require('../app');
-let path=require('path');
-var http = require('http');
-var cluster = require('cluster');
 // var connection = mysql.createConnection({
 //     host     : 'localhost',
 //     user     : 'root',

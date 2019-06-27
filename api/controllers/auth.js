@@ -82,7 +82,7 @@ function CreateNewUser(res,req,created_by){
              password=generatePassword();
          }
         } 
-         if(password==null){
+         if(password==null&& source_id==1){
              return res.status(200).send({
                  message:"Password required",
                  success:false
