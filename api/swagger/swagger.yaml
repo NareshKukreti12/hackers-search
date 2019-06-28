@@ -54,6 +54,42 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /auth/resend:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: auth
+    post:
+      tags:
+        - Auth      
+      description: Resend verification email
+      # used as the method name of the controller
+      operationId: ResendVerification
+      parameters:
+        - name: user
+          in: body
+          required: false
+          schema:
+            $ref: "#/definitions/ResendVerification" 
+        - name: authorization
+          required: false
+          in: header
+          type: string
+          description: Authorization header required only if admin creating new users            
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        "401":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/Unauthorized"            
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"            
   /auth/login:
     # binds a127 app logic to a route
     x-swagger-router-controller: auth
@@ -134,7 +170,7 @@ paths:
     x-swagger-router-controller: auth
     put:
       tags:
-        - Auth    
+        - Password    
       description: Update current password
       # used as the method name of the controller
       operationId: update_password
@@ -160,13 +196,12 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"                      
-
   /auth/password/forgot:
     # binds a127 app logic to a route
     x-swagger-router-controller: auth
     post:
       tags:
-        - Auth    
+        - Password    
       description: Send reset link to registered email address
       # used as the method name of the controller
       operationId: forgot_password
@@ -197,7 +232,7 @@ paths:
     x-swagger-router-controller: auth
     post:
       tags:
-        - Auth    
+        - Password    
       description: Send reset link to registered email address
       # used as the method name of the controller
       operationId: reset_password
@@ -259,7 +294,7 @@ paths:
     get:
       tags:
         - User    
-      description: Fetch all permissions
+      description: Get user details
       # used as the method name of the controller
       operationId: GetUser
       parameters:
@@ -268,11 +303,12 @@ paths:
           description: Pass in query parameter
           required: true
           type: string
-        - name: all
+        - name: user
           in: query
-          description: Pass 1 if you want to get all users (sub-admins)
+          description: To get logged in user details pass user=me in the query parameter
           required: false
-          type: integer
+          type: string
+             
       responses:
         "200":
           description: Success
@@ -780,6 +816,14 @@ definitions:
         type: string
       password:
         type: string
+  ResendVerification:
+     required:
+       - email
+     properties:
+       email:
+         type: string
+    
+  
   ErrorResponse:
     required:
       - message

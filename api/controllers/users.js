@@ -152,12 +152,12 @@ module.exports={
                     'LEFT JOIN user_roles UROLE on UROLE.role_id=UA.role_id '+
                     'LEFT JOIN  (SELECT s.role_id,'+
                     'GROUP_CONCAT(s.permission_id) AS permissions '+
-                    'FROM user_permissions s '+
-                    'GROUP BY s.role_id) x ON x.role_id = UA.role_id';
+                    'FROM user_permissions s where s.status=1 '+
+                    'GROUP BY s.role_id ) x ON x.role_id = UA.role_id';
                 // where UA.u_id=?
 
-                let types=req.swagger.params.all.value || null;
-                if(types!=null && types==1){
+                let types=req.swagger.params.user.value || null;
+                if(types!="me"){
                     
                 query+=' where UA.role_id!=3 and UA.u_id!='+decoded.id +' and UA.status=1 order by UA.u_id DESC';
                 }
@@ -587,6 +587,21 @@ module.exports={
          }
          else{
            Responses.Unauthorized(res);
+         }
+     },
+     Me:(req,res)=>{
+         if(req.headers && req.headres.authorization){
+            let authorization=req.headers.authorization,decoded;
+            try{
+                decoded=jwt.verify(authorization,config.secretKey);
+            } 
+            catch{
+                Responses.Unauthorized(res)
+            }
+
+         }
+         else{
+             Responses.Unauthorized(res)
          }
      }
 }

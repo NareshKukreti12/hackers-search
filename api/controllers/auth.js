@@ -269,6 +269,28 @@ function sendMail(email,name,resetToken,password,type,source_id){
         
 }//End of Send Mail
 
+function UpdatePassword(new_password,old_password,u_id,res,type){
+    bcrypt.hash(new_password,null,null,function(err,hash){
+        let user_credential_trail={
+            u_id:u_id,
+            password:old_password,
+            modified_by:u_id,
+            modified_date:new Date(),
+            modified_time:new Date()
+        }
+        console.log(hash);
+           connection.query('update user_account set password=? where u_id=?',[hash,u_id],function(err,pwd_response){
+              if(err)throw err;
+              type==0? res.status(200).send({
+                   success:true,
+                   message:"Your password updated successfully!"
+               }) : console.log("New password updated")
+               connection.query('insert into user_credential_trail SET ?',[user_credential_trail],function(err,trail){
+                   console.log("success");
+               })
+           })
+       })
+}
 
 
  
@@ -463,18 +485,19 @@ module.exports={
                                modified_date:new Date(),
                                modified_time:new Date()
                            }
-                           bcrypt.hash(new_password,null,null,function(err,hash){
-                            console.log(hash);
-                               connection.query('update user_account set password=? where u_id=?',[hash,decoded.id],function(err,pwd_response){
-                                   res.status(200).send({
-                                       success:true,
-                                       message:"Your password updated successfully!"
-                                   })
-                                   connection.query('insert into user_credential_trail SET ?',[user_credential_trail],function(err,trail){
-                                       console.log("success");
-                                   })
-                               })
-                           })
+                        //    bcrypt.hash(new_password,null,null,function(err,hash){
+                        //     console.log(hash);
+                        //        connection.query('update user_account set password=? where u_id=?',[hash,decoded.id],function(err,pwd_response){
+                        //            res.status(200).send({
+                        //                success:true,
+                        //                message:"Your password updated successfully!"
+                        //            })
+                        //            connection.query('insert into user_credential_trail SET ?',[user_credential_trail],function(err,trail){
+                        //                console.log("success");
+                        //            })
+                        //        })
+                        //    })
+                        UpdatePassword(new_password,result[0]["password"],result[0]["u_id"],res,0)
                         }
                         else{
                             res.status(200).send({
@@ -553,6 +576,37 @@ module.exports={
                    })
                })
            })
+        })
+    },
+    ResendVerification:(req,res)=>{
+        let email=req.swagger.params.user.value.email;
+        Users.GetUserByEmail(email).then(user=>{
+            if(user[0]["email_confirmed"]==0){
+                let token=createResetToken({
+                    id:user[0]["u_id"]
+                })
+                res.status(200).send({
+                    success:false,
+                    message:"A verificatin mail has been sent to your email address, kindly confirm your email!"
+                })
+                let password=generatePassword();
+                UpdatePassword(password,user[0]["password"],user[0]["u_id"],res,1)
+                sendMail
+                (
+                      user[0]["email"],
+                      user[0]["first_name"]+" "+user[0]["last_name"],
+                      token,password,
+                      1,
+                      user[0]["source_id"]
+                );
+                //console.log(token);
+            }
+            else{
+                res.status(200).send({
+                    success:false,
+                    message:"This account is already verified!"
+                })
+            }
         })
     }
    
