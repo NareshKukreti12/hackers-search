@@ -118,7 +118,6 @@ module.exports={
                   
                     Users.Permissions().then(perm=>{
                         let permissions=[]=perm;
-                        console.log("All Permissions");
                         let query= 'SELECT ' +
                     'UA.u_id ,'+
                     'UA.email,'+
@@ -229,7 +228,6 @@ module.exports={
                              message:"No data found!"
                          })
                      }
-                   // console.log(users)
                     })
                  })
                     
@@ -265,7 +263,6 @@ module.exports={
 
     UserRoles:(req,res)=>{
         Users.Permissions().then(perm=>{
-            console.log(perm);
             let query='select UA.*,x.permissions from user_roles UA '+
             'LEFT JOIN  (SELECT s.role_id,s.status ,'+
             'GROUP_CONCAT(s.permission_id) AS permissions '+  
@@ -275,7 +272,6 @@ module.exports={
             connection.query(query,[1],function(err,result){
                 if(err)throw err;
                 let roles=[];
-                console.log(result);
                 if(result.length==0){
                     return res.status(204).send({
                         message:"No roles found"
@@ -293,7 +289,6 @@ module.exports={
                           permission:perm[allPerms[j]-1]
                        })
                     }
-                    console.log("Permissions",permissions)
                     roles.push({
                         role_id:result[i]["role_id"],
                         role:result[i]["role"],
@@ -375,14 +370,12 @@ module.exports={
                      u_id
                  ],function(err,result){
                       if(err)throw err;
-                      console.log("user details updated")
                       res.status(200).send({
                           success:true,
                           message:'User details has been updated successfully'
                       });
                     
                       let date=new Date()
-                   console.log("Role Id",role_id)
                    connection.query('update user_account set role_id=?,modified_by_id=?,modified_on=? where u_id=?',[role_id,modified_by_id,date,u_id],function(err,result){
                        if(err)throw err;
                        console.log("User role updated successfully!");
@@ -438,7 +431,6 @@ module.exports={
                     let roles=req.swagger.params.user.value.roles;
                     let role_name=roles[0]["role"];
                     Users.GetRole(role_name).then(isExists=>{
-                        console.log("Exists",isExists);
                         if(isExists==false){
                           
                            let user_roles={
@@ -563,7 +555,6 @@ module.exports={
                 }
                 let role_id=req.swagger.params.user.value.role_id;
                    let permissions=req.swagger.params.user.value.permissions;
-                   console.log("Role id",role_id," Permissions",permissions);
                    connection.query('update user_permissions set status=? where role_id=?',[0,role_id],function(err,result){
                        if(err)throw err;
                        let user_permissions=[];

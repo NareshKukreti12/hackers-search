@@ -51,8 +51,6 @@ function parseDate(dateStr, format) {
 function CreateNewUser(res,req,created_by){
     let d=new Date();
     let date=d.getFullYear()+"/"+d.getMonth()+"/"+d.getDate();
-    console.log(new Date().toLocaleTimeString());
-   console.log(parseDate("05/11/1896",'dd/mm/YYYY'));
     let email=req.swagger.params.user.value.email;
     let role_id=req.swagger.params.user.value.role_id;
     let source_id=req.swagger.params.user.value.source_id;
@@ -88,19 +86,10 @@ function CreateNewUser(res,req,created_by){
                  success:false
              })
          }
-        //  if(role_id!=3){
-        //      if(permisssions==null || permisssions.length==0){
-        //          return res.status(200).send({
-        //              success:false,
-        //              message:"Permissions required"
-        //          })
-        //      }
-        //  }
-         console.log("Password is",password);
+       
          bcrypt.hash(password,null,null,function(err,hash){
              let user_id;
              if(err)throw err;
-             console.log(hash);
             let  user_account;
             if(source_id==1){
                 user_account={
@@ -127,7 +116,6 @@ function CreateNewUser(res,req,created_by){
             }
             connection.query('insert into user_account SET ?',[user_account],function(err,result){
                 if(err)throw err;
-                console.log("Insert Id", result.insertId);
                 let user_account_personal={
                     address_line1:address_line1,
                     address_line2:address_line2,
@@ -154,7 +142,6 @@ function CreateNewUser(res,req,created_by){
                 })
                 connection.query('insert into user_account_personal SET ?',[user_account_personal],function(err,user){
                    if(err)throw err;
-                    console.log("Success");
                     let name=first_name+" "+last_name;
                     if(role_id==1){
                         res.status(200).send({
@@ -247,7 +234,6 @@ function sendMail(email,name,resetToken,password,type,source_id){
          testMailTemplate
          .render(template_location,locals)
          .then((result)=>{
-             //console.log(result);
             var mailOptions = {
                 from: adminEmail,
                 to: email,
@@ -259,7 +245,7 @@ function sendMail(email,name,resetToken,password,type,source_id){
             if (error) {
             }
             else {                         
-            console.log("Success")           
+            console.log("Email sent successfully")           
             }
            });
          })
@@ -278,7 +264,6 @@ function UpdatePassword(new_password,old_password,u_id,res,type){
             modified_date:new Date(),
             modified_time:new Date()
         }
-        console.log(hash);
            connection.query('update user_account set password=? where u_id=?',[hash,u_id],function(err,pwd_response){
               if(err)throw err;
               type==0? res.status(200).send({
@@ -337,10 +322,7 @@ module.exports={
                  Users.GetUserByUserId(decoded.id).then(response=>{
                      
                         if(response[0]["role_id"]==1){
-                            CreateNewUser(res,req,1);
-                            // let permission=req.swagger.params.user.value.permissions;
-                            // console.log(permission[0]);
-
+                            CreateNewUser(res,req,1);                         
                         }
                         else{
                             Responses.Unauthorized(res);
@@ -350,7 +332,6 @@ module.exports={
                  })
              }
              else{
-                 console.log("Inside else")
                 CreateNewUser(res,req,0);
              } 
          },(err)=>{
@@ -361,14 +342,10 @@ module.exports={
         let email=req.swagger.params.user.value.email;
         let password=req.swagger.params.user.value.password;
         let source_id=req.swagger.params.user.value.source_id;
-        console.log(email);
-     //   console.log(password)
         let query='select u_id,password from user_account where email=? and status=? and source_id=?';
         connection.query(query,[email,1,source_id],function(err,result){
             if(err)throw err;
            if(result.length>0){
-               console.log("Inide if");
-                 console.log(result[0]["password"])
              if(source_id==1){
                  if(password==null || password.length==0){
                      return res.status(200).send({
@@ -377,15 +354,12 @@ module.exports={
                     })
                  }
                 bcrypt.compare(password,result[0]["password"],function(errr,respp){
-                    console.log(respp);
-      
                       if(respp){
                       
                       let user={
                           id:result[0]["u_id"]
                       }
                       let token=loginToken(user);
-                      console.log("Login Token=",token);
                       res.status(200).send({
                           success:true,
                           message:"success",
@@ -437,15 +411,12 @@ module.exports={
     },
     verifyEmail:(req,res)=>{
         let token=req.swagger.params.verify_token.value;
-        
-        console.log(token);
         if(token){
             let decoded;
             try{
                 decoded=jwt.verify(token,config.secretKey);
             }
             catch(err){
-                console.log(err)
                 Responses.Unauthorized(res);
             }
             connection.query('update user_claims set email_confirmed=? where u_id=?',[1,decoded.id],function(err,result){
@@ -477,7 +448,6 @@ module.exports={
             Users.GetUserByUserId(decoded.id).then(result=>{
                     bcrypt.compare(current_password,result[0]["password"],function(err,respp){
                         if(respp){
-                           console.log("Success",result[0]);
                            let user_credential_trail={
                                u_id:result[0]["u_id"],
                                password:result[0]["password"],
@@ -485,18 +455,6 @@ module.exports={
                                modified_date:new Date(),
                                modified_time:new Date()
                            }
-                        //    bcrypt.hash(new_password,null,null,function(err,hash){
-                        //     console.log(hash);
-                        //        connection.query('update user_account set password=? where u_id=?',[hash,decoded.id],function(err,pwd_response){
-                        //            res.status(200).send({
-                        //                success:true,
-                        //                message:"Your password updated successfully!"
-                        //            })
-                        //            connection.query('insert into user_credential_trail SET ?',[user_credential_trail],function(err,trail){
-                        //                console.log("success");
-                        //            })
-                        //        })
-                        //    })
                         UpdatePassword(new_password,result[0]["password"],result[0]["u_id"],res,0)
                         }
                         else{
@@ -521,15 +479,10 @@ module.exports={
                     message:"No such user exists!"
                 })
              }
-             console.log(user[0]["u_id"]);
              let userd={
                  id:user[0]["u_id"]
              }
              let resetToken=createResetToken(userd);
-             console.log("Reset Token",resetToken)
-            //  let reset_token={
-            //      id:createResetToken(user[0]["u_id"])
-            //  }
            let name=user[0]["first_name"]+" "+user[0]["last_name"]
            res.status(200).send({
                success:true,
@@ -549,7 +502,6 @@ module.exports={
         catch{
             Responses.Unauthorized(res);
         }
-        console.log(decoded.id);
         Users.GetUserByUserId(decoded.id).then(userdetails=>{
             if(userdetails.length==0){
                 return res.status(204).send({
@@ -599,7 +551,6 @@ module.exports={
                       1,
                       user[0]["source_id"]
                 );
-                //console.log(token);
             }
             else{
                 res.status(200).send({
