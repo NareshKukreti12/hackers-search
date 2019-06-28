@@ -1,0 +1,44 @@
+@font-face {
+    font-family: "Typedepot-Regular",sans-serif;
+    src: url("file:///http://prminfotech.com/piciris/assets/fonts/Typedepot-CentraleSans-Regular.ttf") format("truetype");
+}
+* {
+    margin: 0;
+    padding: 0;           
+    font-family: "Typedepot-Regular","Century Gothic", sans-serif !important;
+    font-size: 24px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: 500;
+    line-height: 1em;
+}
+.home {
+    width: 60%;margin: 0 auto;background-color: #fff;border-radius: 5px;
+}
+.logo {
+    max-height: 100px;
+}
+@media screen and (min-width: 801px) {
+     .home {
+        width: 60%;margin: 0 auto;background-color: #fff;border-radius: 5px;
+       }
+}
+
+@media screen and (max-width: 1280px) {
+    .hide_me {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 800px) {
+    .hide_me {
+       display: none;
+    }
+    .home {
+        width: 100%;
+    }
+    .logo {
+        width: 90%;
+        
+    }
+}
