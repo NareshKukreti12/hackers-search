@@ -219,7 +219,7 @@ module.exports={
                             })
                            
                       }//End of i
-                      console.log(users);
+                     
                       res.status(200).send({
                           users
                       })
