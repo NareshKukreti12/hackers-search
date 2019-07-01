@@ -16,7 +16,7 @@ require('dotenv').config();
 // CONNECTIONLIMIT=5
 
   var db_config = {
-     host     : process.env.HOST,//'50.62.209.3',
+     host     : process.env.HOST,
     user     : process.env.USERNAME,
     password : process.env.PASSWORD,
     database : process.env.DATABASE,
