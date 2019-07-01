@@ -3,30 +3,7 @@ var connection = require('../db'),
 _       = require('lodash'),
  {Users}=require('../user'),
  {Responses}=require('../responses'),
-config  = require('../config'),
-jwt     = require('jsonwebtoken'),
-bcrypt  = require('bcrypt-nodejs');
-var frontEndUrl=config.front_end_url;
-var adminEmail = "info@prminfotech.com";
-var nodemailer = require('nodemailer');  
-const Email = require('email-templates');
-var transporter = nodemailer.createTransport
-({
-        service: 'gmail',
-        auth: 
-        {
-            user: config.user,
-            pass: config.pass
-        }
-});
-function createResetToken(user) {
-    return jwt.sign(_.omit(user, 'userId'), config.secretKey, { expiresIn: 7200000});
-}//End of Create Reset Token 
- 
-function loginToken (user) {
-    return jwt.sign(_.omit(user, 'password'), config.secretKey, { expiresIn: 5259492000});
-}//End of Create Token
-
+ jwt     = require('jsonwebtoken')
 
 function isUserAuthorize(u_id,permission_id){
     return new Promise((resolve,reject)=>{
@@ -79,7 +56,7 @@ module.exports={
         if(req.headers && req.headers.authorization){
            let authorization=req.headers.authorization,decoded;
            try{
-              decoded=jwt.verify(authorization,config.secretKey);
+              decoded=jwt.verify(authorization,process.env.SECRETKEY);
            }
            catch{
              Responses.Unauthorized(res);
@@ -107,7 +84,7 @@ module.exports={
         if(req.headers && req.headers.authorization){
             let authorization=req.headers.authorization,decoded;
             try{
-               decoded=jwt.verify(authorization,config.secretKey);
+               decoded=jwt.verify(authorization,process.env.SECRETKEY);
 
             }
             catch{
@@ -242,7 +219,7 @@ module.exports={
           if(req.headers && req.header.authorization){
              let authorization=req.headers.authorization,decoded;
              try{
-                 decoded=jwt.verify(authorization,config.secretKey);
+                 decoded=jwt.verify(authorization,process.env.SECRETKEY);
              }catch{
                Responses.Unauthorized(res);
              }
@@ -306,7 +283,7 @@ module.exports={
          if(req.headers  && req.headers.authorization){
             let authorization=req.headers.authorization,decoded;
             try{
-               decoded=jwt.verify(authorization,config.secretKey);
+               decoded=jwt.verify(authorization,process.env.SECRETKEY);
             }
             catch{
                Responses.Unauthorized(res);
@@ -421,7 +398,7 @@ module.exports={
              let authorization=req.headers.authorization,decoded;  
             try
               {
-                  decoded=jwt.verify(authorization,config.secretKey);
+                  decoded=jwt.verify(authorization,process.env.SECRETKEY);
               }
               catch{
                Responses.Unauthorized(res);
@@ -473,7 +450,7 @@ module.exports={
             let authorization=req.heades.authorization,decoded;
             try
             {
-              decoded=jwt.verify(authorization,config.secretKey);  
+              decoded=jwt.verify(authorization,process.env.SECRETKEY);  
             }
             catch{
                 Responses.Unauthorized(res);
@@ -506,7 +483,7 @@ module.exports={
          if(req.headers && req.headers.authorization){
             let authorization=req.headers.authorization,decoded; 
             try{
-                 decoded=jwt.verify(authorization,config.secretKey);
+                 decoded=jwt.verify(authorization,process.env.SECRETKEY);
              }
              catch{
                  Responses.Unauthorized(res);
@@ -541,7 +518,7 @@ module.exports={
             let authorization=req.headers.authorization,decoded; 
             try
             {
-               decoded=jwt.verify(authorization,config.secretKey);
+               decoded=jwt.verify(authorization,process.env.SECRETKEY);
             }catch(e){
                 Responses.Unauthorized(res);
             }
@@ -584,7 +561,7 @@ module.exports={
          if(req.headers && req.headres.authorization){
             let authorization=req.headers.authorization,decoded;
             try{
-                decoded=jwt.verify(authorization,config.secretKey);
+                decoded=jwt.verify(authorization,process.env.SECRETKEY);
             } 
             catch{
                 Responses.Unauthorized(res)

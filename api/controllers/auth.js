@@ -2,24 +2,23 @@
 var connection = require('../db'),
 _       = require('lodash'),
  {Users}=require('../user'),
-config  = require('../config'),
 jwt     = require('jsonwebtoken'),
-bcrypt  = require('bcrypt-nodejs'),
-{Responses}=require('../responses');
-var frontEndUrl=config.front_end_url;
+bcrypt  = require('bcrypt-nodejs');
+const {Responses}=require('../responses');
+var frontEndUrl=  process.env.FRONTENDURL//config.front_end_url;
 var adminEmail = "info@prminfotech.com";
 var nodemailer = require('nodemailer');  
 const Email = require('email-templates');
+require('dotenv').config();
 var transporter = nodemailer.createTransport
 ({
         service: 'gmail',
         auth: 
         {
-            user: config.user,
-            pass: config.pass
+            user: process.env.EMAIL,
+            pass: process.env.EPASSWORD
         }
 });
-
 
 function generatePassword() {
     var length = 8,
@@ -31,11 +30,11 @@ function generatePassword() {
     return retVal;
 }
 function createResetToken(user) {
-    return jwt.sign(_.omit(user, 'userId'), config.secretKey, { expiresIn: 7200000});
+    return jwt.sign(_.omit(user, 'userId'), process.env.SECRETKEY, { expiresIn: 7200000});
 }//End of Create Reset Token 
  
 function loginToken (user) {
-    return jwt.sign(_.omit(user, 'password'), config.secretKey, { expiresIn: 5259492000});
+    return jwt.sign(_.omit(user, 'password'), process.env.SECRETKEY, { expiresIn: 5259492000});
 }//End of Create Token
 
 function parseDate(dateStr, format) {
@@ -313,7 +312,7 @@ module.exports={
                  let authorization=req.headers.authorization,decoded;
                  try
                  {
-                     decoded=jwt.verify(authorization,config.secretKey)
+                     decoded=jwt.verify(authorization,process.env.SECRETKEY)
                  }
                  catch
                  {
@@ -398,7 +397,7 @@ module.exports={
         if(req.headers && req.headers.authorization){
             let authorization=req.headers.authorization,decoded;
             try{
-                decoded=jwt.verify(authorization,config.secretKey);
+                decoded=jwt.verify(authorization,process.env.SECRETKEY);
             }
             catch{
                 Responses.Unauthorized(res);
@@ -414,7 +413,7 @@ module.exports={
         if(token){
             let decoded;
             try{
-                decoded=jwt.verify(token,config.secretKey);
+                decoded=jwt.verify(token,process.env.SECRETKEY);
             }
             catch(err){
                 Responses.Unauthorized(res);
@@ -438,7 +437,7 @@ module.exports={
         if(req.header && req.headers.authorization){
             let authorization=req.headers.authorization,decoded; 
             try{
-                decoded=jwt.verify(authorization,config.secretKey);
+                decoded=jwt.verify(authorization,process.env.SECRETKEY);
              }
              catch{
                 Responses.Unauthorized(res);
@@ -497,7 +496,7 @@ module.exports={
         
         let decoded;
         try{
-            decoded=jwt.verify(token,config.secretKey);
+            decoded=jwt.verify(token,process.env.SECRETKEY);
         }
         catch{
             Responses.Unauthorized(res);
