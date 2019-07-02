@@ -37,16 +37,7 @@ function loginToken (user) {
     return jwt.sign(_.omit(user, 'password'), process.env.SECRETKEY, { expiresIn: 5259492000});
 }//End of Create Token
 
-function parseDate(dateStr, format) {
-    const regex = format.toLocaleLowerCase()
-      .replace(/\bd+\b/, '(?<day>\\d+)')
-      .replace(/\bm+\b/, '(?<month>\\d+)')
-      .replace(/\by+\b/, '(?<year>\\d+)')
-    
-    const parts = new RegExp(regex).exec(dateStr) || {};
-    const { year, month, day } = parts.groups || {};
-    return parts.length === 4 ? new Date(year, month-1, day) : undefined;
-  }
+
 function CreateNewUser(res,req,created_by){
     let d=new Date();
     let date=d.getFullYear()+"/"+d.getMonth()+"/"+d.getDate();
@@ -142,10 +133,10 @@ function CreateNewUser(res,req,created_by){
                 connection.query('insert into user_account_personal SET ?',[user_account_personal],function(err,user){
                    if(err)throw err;
                     let name=first_name+" "+last_name;
-                    if(role_id==1){
+                    if(role_id!=3){
                         res.status(200).send({
                             success:true,
-                            message:"New user has been created successfully!"
+                            message:"New user has been created successfully. A verification mail has been sent to user's email address, kindly ask user to confirm email!"
                         })
                        // Permission(user_id,created_by_id,permisssions);
                     }

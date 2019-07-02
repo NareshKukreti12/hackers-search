@@ -24,7 +24,7 @@ paths:
     post:
       tags:
         - Auth      
-      description: Create New Account
+      description: Create New Account/User
       # used as the method name of the controller
       operationId: CreateAccount
       parameters:
